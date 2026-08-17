@@ -200,7 +200,6 @@ customer-churn-prediction-sklearn/
 │   └── evaluate.py               # metrics + plots → graphs/
 ├── models/
 │   └── best_model.pkl            # tuned Random Forest pipeline
-├── app.py                        # Streamlit scoring dashboard
 ├── requirements.txt
 └── README.md
 ```
@@ -239,20 +238,6 @@ python src/evaluate.py --model models/best_model.pkl
 `train.py` compares candidates with stratified CV, tunes the winner, and saves the fitted pipeline.  
 `evaluate.py` prints a classification report and refreshes plots in `graphs/`.
 
-### Option C — Streamlit dashboard
-
-```bash
-streamlit run app.py
-```
-
-Pages:
-
-- **Overview** — test metrics plus charts from `graphs/`
-- **Score a customer** — form → churn probability / risk band (uses the saved pipeline)
-- **Batch score** — upload a CSV (or preview the project dataset) and download scored results
-
-The decision threshold slider trades recall vs precision without retraining.
-
 ---
 
 ## Key Takeaways
@@ -267,7 +252,7 @@ The decision threshold slider trades recall vs precision without retraining.
 
 ## Tech Stack
 
-Python · scikit-learn · pandas · matplotlib / seaborn · joblib · Streamlit
+Python · scikit-learn · pandas · matplotlib / seaborn · joblib
 
 ---
 
