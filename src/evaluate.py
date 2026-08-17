@@ -7,6 +7,8 @@ Usage:
 """
 
 import argparse
+from pathlib import Path
+
 import joblib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -16,10 +18,13 @@ from sklearn.metrics import (
 )
 from sklearn.inspection import permutation_importance
 
-from preprocessing import get_feature_names
+ROOT = Path(__file__).resolve().parents[1]
+GRAPHS_DIR = ROOT / "graphs"
 
 
 def main(model_path: str):
+    GRAPHS_DIR.mkdir(parents=True, exist_ok=True)
+
     model = joblib.load(model_path)
     X_test, y_test = joblib.load(model_path.replace('.pkl', '_testset.pkl'))
 
@@ -35,8 +40,9 @@ def main(model_path: str):
     ConfusionMatrixDisplay(cm, display_labels=['No Churn', 'Churn']).plot()
     plt.title('Confusion Matrix')
     plt.tight_layout()
-    plt.savefig('models/confusion_matrix.png')
-    print("Saved confusion_matrix.png")
+    out = GRAPHS_DIR / "confusion_matrix.png"
+    plt.savefig(out, dpi=150, bbox_inches="tight")
+    print(f"Saved {out}")
 
     # Precision-recall curve
     precision, recall, _ = precision_recall_curve(y_test, y_proba)
@@ -46,25 +52,24 @@ def main(model_path: str):
     plt.ylabel('Precision')
     plt.title('Precision-Recall Curve')
     plt.tight_layout()
-    plt.savefig('models/precision_recall_curve.png')
-    print("Saved precision_recall_curve.png")
+    out = GRAPHS_DIR / "precision_recall_curve.png"
+    plt.savefig(out, dpi=150, bbox_inches="tight")
+    print(f"Saved {out}")
 
-    # Permutation feature importance
-    preprocessor = model.named_steps['preprocessor']
-    feature_names = get_feature_names(preprocessor)
-
+    # Permutation feature importance (permutes original X columns)
     result = permutation_importance(
         model, X_test, y_test, n_repeats=10, random_state=42, scoring='roc_auc'
     )
-    importances = pd.Series(result.importances_mean, index=feature_names).sort_values(ascending=False)
+    importances = pd.Series(result.importances_mean, index=X_test.columns).sort_values(ascending=False)
 
     plt.figure(figsize=(8, 6))
     importances.head(15).plot(kind='barh')
     plt.title('Top 15 Feature Importances (Permutation)')
     plt.gca().invert_yaxis()
     plt.tight_layout()
-    plt.savefig('models/feature_importance.png')
-    print("Saved feature_importance.png")
+    out = GRAPHS_DIR / "feature_importance.png"
+    plt.savefig(out, dpi=150, bbox_inches="tight")
+    print(f"Saved {out}")
 
     print("\nTop 10 features:")
     print(importances.head(10))
